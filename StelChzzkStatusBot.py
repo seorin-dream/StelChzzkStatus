@@ -3,16 +3,23 @@ import telegram
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 import requests
-import asyncio
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 
+# Telegram bot token
 token = "7616896847:AAFeYheTLiBQ0mq7Nxap5FyGbEWbsgYUyhk"
 telegram_api_token = token
-# 유출에 주의
 
 class TelegramBotHandler:
+    # Handler for the /stelstatus command (First service)
     @classmethod
     async def stelstatus(cls, update: Update, context: ContextTypes.DEFAULT_TYPE):
         bot = telegram.Bot(token)
+
+        # Part 1: Checking live status using requests (first service)
         headers = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"}
         chzzk_url = 'https://api.chzzk.naver.com/service/v1/channels/{channelID}'
 
@@ -28,15 +35,14 @@ class TelegramBotHandler:
             '4d812b586ff63f8a2946e64fa860bbf5': '나나',
             '8fd39bb8de623317de90654718638b10': '리코'
         }
-        result_list = [] # 저장된 결과가 담길 리스트
+        result_list = []  # Save results for first service
 
         for channel_id, channel_name in channel_ids.items():
             url = chzzk_url.format(channelID=channel_id)
             response = requests.get(url, headers=headers)
+            data = response.json()
 
-            data = response.json()  # HTML 쓰면 안된다고 JSON 데이터 파싱
             open_live_status = data['content']['openLive']
-
             if open_live_status:
                 LiveStatus = f"{channel_name}: 📺 지금 방송 중이야!"
                 result_list.append(LiveStatus)
@@ -46,13 +52,68 @@ class TelegramBotHandler:
 
         result_list_final = '\n'.join(result_list)
         print(result_list_final)
-        # await bot.send_message(chat_id="-4552916950", text=result_list_final)
-        await update.message.reply_text(text=result_list_final)
+        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final)
+
+    # Handler for the /isedolstatus command (AfreecaTV using Selenium)
+    @classmethod
+    async def isedolstatus(cls, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        bot = telegram.Bot(token)
+
+        # Part 2: Checking live status using Selenium (AfreecaTV channels)
+        afreeca_channel_ids = {
+            'jingburger1': '징버거',
+            'inehine': '아이네',
+            'lilpa0309': '릴파',
+            'cotton1217': '주르르',
+            'gosegu2': '고세구',
+            'viichan6': '비챤'
+        }
+
+        result_list = []  # Save results for AfreecaTV
+
+        # Set up Selenium (Edge options)
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("--headless")  # Run in headless mode (no browser UI)
+        chrome_options.add_argument("--no-sandbox")  # Recommended for running as root
+        chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+        chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration (optional)
+
+        # ChromDriver path
+        webdriver_service = ChromeService('/home/pmh10132000/chromedriver-linux64/chromedriver')
+
+        # Initialize the Chrome WebDriver
+        driver = webdriver.Chrome(service=webdriver_service, options=chrome_options)
+
+        # Iterate through AfreecaTV channels
+        for channel_id, channel_name in afreeca_channel_ids.items():
+            url = f'https://bj.afreecatv.com/{channel_id}'
+            driver.get(url)
+            try:
+                onAir_box = driver.find_element(By.CLASS_NAME, 'onAir_box')
+                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야!"
+                result_list.append(LiveStatus)
+            except NoSuchElementException:
+                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야!"
+                result_list.append(LiveStatus)
+
+        # Close the Selenium driver after use
+        driver.quit()
+
+        # Combine results and send them back to the user
+        result_list_final = '\n'.join(result_list)
+        print(result_list_final)
+        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final)
 
 if __name__ == "__main__":
     try:
+        # Initialize the application
         application = ApplicationBuilder().token(token).build()
+
+        # Add both handlers
         application.add_handler(CommandHandler('stelstatus', TelegramBotHandler.stelstatus))
+        application.add_handler(CommandHandler('isedolstatus', TelegramBotHandler.isedolstatus))
+
+        # Start the bot
         application.run_polling()
     except KeyboardInterrupt:
         pass
