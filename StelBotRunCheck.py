@@ -15,3 +15,5 @@ if ( text_location == -1 ):
     print("Program restarted!")
 else:
     print("Process exists. Location is",text_location)
+
+os._exit(os.EX_OK)
