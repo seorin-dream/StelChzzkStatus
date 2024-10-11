@@ -38,10 +38,10 @@ class TelegramBotHandler:
             open_live_status = data['content']['openLive']
 
             if open_live_status:
-                LiveStatus = f"{channel_name}: 지금 방송 중이야!"
+                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야!"
                 result_list.append(LiveStatus)
             else:
-                LiveStatus = f"{channel_name}: 지금 방송 중이 아니야!"
+                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야!"
                 result_list.append(LiveStatus)
 
         result_list_final = '\n'.join(result_list)
