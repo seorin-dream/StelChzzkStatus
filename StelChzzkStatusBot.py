@@ -1,5 +1,7 @@
 import os
 import telegram
+import httpx
+import json
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 import requests
@@ -22,6 +24,9 @@ class TelegramBotHandler:
         # Part 1: Checking live status using requests (first service)
         headers = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"}
         chzzk_url = 'https://api.chzzk.naver.com/service/v1/channels/{channelID}'
+        chzzk_ch_live_url = 'https://chzzk.naver.com/live/{channelID}'
+        chzzk_station_url = 'https://chzzk.naver.com/{channelID}'
+        chzzk_live_url = 'https://api.chzzk.naver.com/service/v2/channels/{channel_api_id}/live-detail'
 
         channel_ids = {
             'f722959d1b8e651bd56209b343932c01': '칸나',
@@ -38,21 +43,34 @@ class TelegramBotHandler:
         result_list = []  # Save results for first service
 
         for channel_id, channel_name in channel_ids.items():
+
             url = chzzk_url.format(channelID=channel_id)
+            channel_url = chzzk_ch_live_url.format(channelID=channel_id)
+            station_url = chzzk_station_url.format(channelID=channel_id)
+            api_url = chzzk_live_url.format(channel_api_id=channel_id)
             response = requests.get(url, headers=headers)
             data = response.json()
 
             open_live_status = data['content']['openLive']
             if open_live_status:
-                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야!"
+                api_response = requests.get(api_url, headers=headers)
+                api_data = api_response.json()
+                api_content_data = api_data["content"]
+                api_livePlayback_data = api_content_data["livePlaybackJson"]
+                playback = json.loads(api_livePlayback_data)
+                for media in playback["media"]:
+                    if media["mediaId"] == "HLS":
+                        HLS_Address = media["path"]
+                    
+                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
                 result_list.append(LiveStatus)
             else:
-                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야!"
+                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야! [채널]({station_url})"
                 result_list.append(LiveStatus)
 
         result_list_final = '\n'.join(result_list)
         print(result_list_final)
-        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final)
+        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final, parse_mode= 'Markdown', disable_web_page_preview=True)
 
     # Handler for the /stardays_status command (Second service)
     @classmethod
@@ -62,6 +80,9 @@ class TelegramBotHandler:
         # Part 1: Checking live status using requests (second service)
         headers = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"}
         chzzk_url = 'https://api.chzzk.naver.com/service/v1/channels/{channelID}'
+        chzzk_ch_live_url = 'https://chzzk.naver.com/live/{channelID}'
+        chzzk_station_url = 'https://chzzk.naver.com/{channelID}'
+        chzzk_live_url = 'https://api.chzzk.naver.com/service/v2/channels/{channel_api_id}/live-detail'
 
         channel_ids = {
             'a54372e8197f6d241a43a318279860d6': '나츠키',
@@ -71,21 +92,34 @@ class TelegramBotHandler:
         result_list = []  # Save results for second service
 
         for channel_id, channel_name in channel_ids.items():
+
             url = chzzk_url.format(channelID=channel_id)
+            channel_url = chzzk_ch_live_url.format(channelID=channel_id)
+            station_url = chzzk_station_url.format(channelID=channel_id)
+            api_url = chzzk_live_url.format(channel_api_id=channel_id)
             response = requests.get(url, headers=headers)
             data = response.json()
 
             open_live_status = data['content']['openLive']
             if open_live_status:
-                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야!"
+                api_response = requests.get(api_url, headers=headers)
+                api_data = api_response.json()
+                api_content_data = api_data["content"]
+                api_livePlayback_data = api_content_data["livePlaybackJson"]
+                playback = json.loads(api_livePlayback_data)
+                for media in playback["media"]:
+                    if media["mediaId"] == "HLS":
+                        HLS_Address = media["path"]
+                    
+                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
                 result_list.append(LiveStatus)
             else:
-                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야!"
+                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야! [채널]({station_url})"
                 result_list.append(LiveStatus)
 
         result_list_final = '\n'.join(result_list)
         print(result_list_final)
-        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final)
+        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final, parse_mode= 'Markdown', disable_web_page_preview=True)
 
     # Handler for the /honeyz_status command (3rd service)
     @classmethod
@@ -95,6 +129,9 @@ class TelegramBotHandler:
         # Part 1: Checking live status using requests (3rd service)
         headers = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"}
         chzzk_url = 'https://api.chzzk.naver.com/service/v1/channels/{channelID}'
+        chzzk_ch_live_url = 'https://chzzk.naver.com/live/{channelID}'
+        chzzk_station_url = 'https://chzzk.naver.com/{channelID}'
+        chzzk_live_url = 'https://api.chzzk.naver.com/service/v2/channels/{channel_api_id}/live-detail'
 
         channel_ids = {
             'c0d9723cbb75dc223c6aa8a9d4f56002': '허니츄러스',
@@ -107,21 +144,34 @@ class TelegramBotHandler:
         result_list = []  # Save results for 3rd service
 
         for channel_id, channel_name in channel_ids.items():
+
             url = chzzk_url.format(channelID=channel_id)
+            channel_url = chzzk_ch_live_url.format(channelID=channel_id)
+            station_url = chzzk_station_url.format(channelID=channel_id)
+            api_url = chzzk_live_url.format(channel_api_id=channel_id)
             response = requests.get(url, headers=headers)
             data = response.json()
 
             open_live_status = data['content']['openLive']
             if open_live_status:
-                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야!"
+                api_response = requests.get(api_url, headers=headers)
+                api_data = api_response.json()
+                api_content_data = api_data["content"]
+                api_livePlayback_data = api_content_data["livePlaybackJson"]
+                playback = json.loads(api_livePlayback_data)
+                for media in playback["media"]:
+                    if media["mediaId"] == "HLS":
+                        HLS_Address = media["path"]
+                    
+                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
                 result_list.append(LiveStatus)
             else:
-                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야!"
+                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야! [채널]({station_url})"
                 result_list.append(LiveStatus)
 
         result_list_final = '\n'.join(result_list)
         print(result_list_final)
-        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final)
+        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final, parse_mode= 'Markdown', disable_web_page_preview=True)
 
     # Handler for the /isedolstatus command (AfreecaTV using Selenium)
     @classmethod
