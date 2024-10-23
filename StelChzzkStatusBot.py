@@ -1,9 +1,9 @@
 import os
 import telegram
-import httpx
 import json
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+from pathlib import Path
 import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -12,8 +12,14 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 
 # Telegram bot token
-token = "7616896847:AAFeYheTLiBQ0mq7Nxap5FyGbEWbsgYUyhk"
+with open('telegram_token', 'r') as file:
+    token = file.read()
 telegram_api_token = token
+print(telegram_api_token)
+
+# Chzzk Adult Token
+cookies_file = json.loads(Path('chzzk_cookies.json').read_text())
+chzzk_cookies = {key: value[0] for key, value in cookies_file.items()}
 
 class TelegramBotHandler:
     # Handler for the /stelstatus command (First service)
@@ -48,24 +54,27 @@ class TelegramBotHandler:
             channel_url = chzzk_ch_live_url.format(channelID=channel_id)
             station_url = chzzk_station_url.format(channelID=channel_id)
             api_url = chzzk_live_url.format(channel_api_id=channel_id)
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers, cookies=chzzk_cookies)
             data = response.json()
 
             open_live_status = data['content']['openLive']
             if open_live_status:
-                api_response = requests.get(api_url, headers=headers)
+                api_response = requests.get(api_url, headers=headers, cookies=chzzk_cookies)
                 api_data = api_response.json()
                 api_content_data = api_data["content"]
                 api_livePlayback_data = api_content_data["livePlaybackJson"]
                 if api_content_data["adult"]:
-                    LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url})"
-                    result_list.append(LiveStatus)
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
+                            LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
                 else:
                     playback = json.loads(api_livePlayback_data)
                     for media in playback["media"]:
                         if media["mediaId"] == "HLS":
                             HLS_Address = media["path"]
-                    
                             LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
                             result_list.append(LiveStatus)
                     
@@ -107,19 +116,22 @@ class TelegramBotHandler:
 
             open_live_status = data['content']['openLive']
             if open_live_status:
-                api_response = requests.get(api_url, headers=headers)
+                api_response = requests.get(api_url, headers=headers, cookies=chzzk_cookies)
                 api_data = api_response.json()
                 api_content_data = api_data["content"]
                 api_livePlayback_data = api_content_data["livePlaybackJson"]
                 if api_content_data["adult"]:
-                    LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url})"
-                    result_list.append(LiveStatus)
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
+                            LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
                 else:
                     playback = json.loads(api_livePlayback_data)
                     for media in playback["media"]:
                         if media["mediaId"] == "HLS":
                             HLS_Address = media["path"]
-                    
                             LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
                             result_list.append(LiveStatus)
             else:
@@ -163,19 +175,22 @@ class TelegramBotHandler:
 
             open_live_status = data['content']['openLive']
             if open_live_status:
-                api_response = requests.get(api_url, headers=headers)
+                api_response = requests.get(api_url, headers=headers, cookies=chzzk_cookies)
                 api_data = api_response.json()
                 api_content_data = api_data["content"]
                 api_livePlayback_data = api_content_data["livePlaybackJson"]
                 if api_content_data["adult"]:
-                    LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url})"
-                    result_list.append(LiveStatus)
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
+                            LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
                 else:
                     playback = json.loads(api_livePlayback_data)
                     for media in playback["media"]:
                         if media["mediaId"] == "HLS":
                             HLS_Address = media["path"]
-                    
                             LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
                             result_list.append(LiveStatus)
             else:
@@ -191,7 +206,7 @@ class TelegramBotHandler:
     async def isedolstatus(cls, update: Update, context: ContextTypes.DEFAULT_TYPE):
         bot = telegram.Bot(token)
 
-        # Part 2: Checking live status using Selenium (AfreecaTV channels)
+        # Part 4: Checking live status using Selenium (AfreecaTV channels)
         afreeca_channel_ids = {
             'jingburger1': '징버거',
             'inehine': '아이네',
