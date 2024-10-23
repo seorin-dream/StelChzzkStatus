@@ -57,13 +57,18 @@ class TelegramBotHandler:
                 api_data = api_response.json()
                 api_content_data = api_data["content"]
                 api_livePlayback_data = api_content_data["livePlaybackJson"]
-                playback = json.loads(api_livePlayback_data)
-                for media in playback["media"]:
-                    if media["mediaId"] == "HLS":
-                        HLS_Address = media["path"]
+                if api_content_data["adult"]:
+                    LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url})"
+                    result_list.append(LiveStatus)
+                else:
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
                     
-                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
-                result_list.append(LiveStatus)
+                            LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
+                    
             else:
                 LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야! [채널]({station_url})"
                 result_list.append(LiveStatus)
@@ -106,13 +111,17 @@ class TelegramBotHandler:
                 api_data = api_response.json()
                 api_content_data = api_data["content"]
                 api_livePlayback_data = api_content_data["livePlaybackJson"]
-                playback = json.loads(api_livePlayback_data)
-                for media in playback["media"]:
-                    if media["mediaId"] == "HLS":
-                        HLS_Address = media["path"]
+                if api_content_data["adult"]:
+                    LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url})"
+                    result_list.append(LiveStatus)
+                else:
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
                     
-                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
-                result_list.append(LiveStatus)
+                            LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
             else:
                 LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야! [채널]({station_url})"
                 result_list.append(LiveStatus)
@@ -158,13 +167,17 @@ class TelegramBotHandler:
                 api_data = api_response.json()
                 api_content_data = api_data["content"]
                 api_livePlayback_data = api_content_data["livePlaybackJson"]
-                playback = json.loads(api_livePlayback_data)
-                for media in playback["media"]:
-                    if media["mediaId"] == "HLS":
-                        HLS_Address = media["path"]
+                if api_content_data["adult"]:
+                    LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url})"
+                    result_list.append(LiveStatus)
+                else:
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
                     
-                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
-                result_list.append(LiveStatus)
+                            LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
             else:
                 LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야! [채널]({station_url})"
                 result_list.append(LiveStatus)
@@ -205,7 +218,7 @@ class TelegramBotHandler:
 
         # Iterate through AfreecaTV channels
         for channel_id, channel_name in afreeca_channel_ids.items():
-            url = f'https://bj.afreecatv.com/{channel_id}'
+            url = f'https://ch.sooplive.co.kr/{channel_id}'
             driver.get(url)
             try:
                 onAir_box = driver.find_element(By.CLASS_NAME, 'onAir_box')
