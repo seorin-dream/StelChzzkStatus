@@ -13,7 +13,7 @@ from selenium.common.exceptions import NoSuchElementException
 
 # Telegram bot token
 with open('telegram_token', 'r') as file:
-    token = file.read()
+    token = file.read().strip()
 telegram_api_token = token
 print(telegram_api_token)
 
