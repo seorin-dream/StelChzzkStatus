@@ -35,8 +35,8 @@ class TelegramBotHandler:
         chzzk_live_url = 'https://api.chzzk.naver.com/service/v2/channels/{channel_api_id}/live-detail'
 
         channel_ids = {
-            'f722959d1b8e651bd56209b343932c01': '칸나',
             '45e71a76e949e16a34764deb962f9d9f': '유니',
+            '36ddb9bb4f17593b60f1b63cec86611d': '후야',
             'b044e3a3b9259246bc92e863e7d3f3b8': '히나',
             '4515b179f86b67b4981e16190817c580': '마시로',
             '4325b1d5bbc321fad3042306646e2e50': '리제',
@@ -86,6 +86,178 @@ class TelegramBotHandler:
         print(result_list_final)
         await bot.send_message(chat_id=update.message.chat_id, text=result_list_final, parse_mode= 'Markdown', disable_web_page_preview=True)
 
+    # Handler for the /aesther_status command (Second service)
+    @classmethod
+    async def aesther_status(cls, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        bot = telegram.Bot(token)
+
+        # Part 1: Checking live status using requests (second service)
+        headers = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"}
+        chzzk_url = 'https://api.chzzk.naver.com/service/v1/channels/{channelID}'
+        chzzk_ch_live_url = 'https://chzzk.naver.com/live/{channelID}'
+        chzzk_station_url = 'https://chzzk.naver.com/{channelID}'
+        chzzk_live_url = 'https://api.chzzk.naver.com/service/v2/channels/{channel_api_id}/live-detail'
+
+        channel_ids = {
+            '4de764d9dad3b25602284be6db3ac647': '아리사',
+            '32fb866e323242b770cdc790f991a6f6': '카린',
+            '17d8605fc37fb5ef49f5f67ae786fe4e': '에리스',
+            '475313e6c26639d5763628313b4c130e': '엘리'
+        }
+        result_list = []  # Save results for second service
+
+        for channel_id, channel_name in channel_ids.items():
+
+            url = chzzk_url.format(channelID=channel_id)
+            channel_url = chzzk_ch_live_url.format(channelID=channel_id)
+            station_url = chzzk_station_url.format(channelID=channel_id)
+            api_url = chzzk_live_url.format(channel_api_id=channel_id)
+            response = requests.get(url, headers=headers)
+            data = response.json()
+
+            open_live_status = data['content']['openLive']
+            if open_live_status:
+                api_response = requests.get(api_url, headers=headers, cookies=chzzk_cookies)
+                api_data = api_response.json()
+                api_content_data = api_data["content"]
+                api_livePlayback_data = api_content_data["livePlaybackJson"]
+                if api_content_data["adult"]:
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
+                            LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
+                else:
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
+                            LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
+            else:
+                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야! [채널]({station_url})"
+                result_list.append(LiveStatus)
+
+        result_list_final = '\n'.join(result_list)
+        print(result_list_final)
+        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final, parse_mode= 'Markdown', disable_web_page_preview=True)
+
+    # Handler for the /stardream_status command (Second service)
+    @classmethod
+    async def stardream_status(cls, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        bot = telegram.Bot(token)
+
+        # Part 1: Checking live status using requests (second service)
+        headers = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"}
+        chzzk_url = 'https://api.chzzk.naver.com/service/v1/channels/{channelID}'
+        chzzk_ch_live_url = 'https://chzzk.naver.com/live/{channelID}'
+        chzzk_station_url = 'https://chzzk.naver.com/{channelID}'
+        chzzk_live_url = 'https://api.chzzk.naver.com/service/v2/channels/{channel_api_id}/live-detail'
+
+        channel_ids = {
+            '7ca6c5f45a9b16f75970f54c309623c0': '하나빈',
+            'e984779fd445e71bfd8c99106e432bf1': '이루네',
+            '4f650f02bc4ab38a998d74e3abb1b68b': '유레이',
+            '91caa53fc6cf5ee3cdbc802bd23bf155': '온하얀'
+        }
+        result_list = []  # Save results for second service
+
+        for channel_id, channel_name in channel_ids.items():
+
+            url = chzzk_url.format(channelID=channel_id)
+            channel_url = chzzk_ch_live_url.format(channelID=channel_id)
+            station_url = chzzk_station_url.format(channelID=channel_id)
+            api_url = chzzk_live_url.format(channel_api_id=channel_id)
+            response = requests.get(url, headers=headers)
+            data = response.json()
+
+            open_live_status = data['content']['openLive']
+            if open_live_status:
+                api_response = requests.get(api_url, headers=headers, cookies=chzzk_cookies)
+                api_data = api_response.json()
+                api_content_data = api_data["content"]
+                api_livePlayback_data = api_content_data["livePlaybackJson"]
+                if api_content_data["adult"]:
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
+                            LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
+                else:
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
+                            LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
+            else:
+                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야! [채널]({station_url})"
+                result_list.append(LiveStatus)
+
+        result_list_final = '\n'.join(result_list)
+        print(result_list_final)
+        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final, parse_mode= 'Markdown', disable_web_page_preview=True)
+
+    # Handler for the /acaxia_status command (Second service)
+    @classmethod
+    async def acaxia_status(cls, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        bot = telegram.Bot(token)
+
+        # Part 1: Checking live status using requests (second service)
+        headers = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"}
+        chzzk_url = 'https://api.chzzk.naver.com/service/v1/channels/{channelID}'
+        chzzk_ch_live_url = 'https://chzzk.naver.com/live/{channelID}'
+        chzzk_station_url = 'https://chzzk.naver.com/{channelID}'
+        chzzk_live_url = 'https://api.chzzk.naver.com/service/v2/channels/{channel_api_id}/live-detail'
+
+        channel_ids = {
+            '3e3781d3bd20dadc2f6f6d5d30091195': '포포포포',
+            '5c897b3e639045ca6e314bbaff991f73': '모네',
+            'dae2de8eaa005a59163f2e4c045e1aa1': '로즈',
+            'b33c957eac9335d38e4043c3dca97675': '하시요',
+            'f36320c432d9f06095ce2cfbbf681c26': '류시호'
+        }
+        result_list = []  # Save results for second service
+
+        for channel_id, channel_name in channel_ids.items():
+
+            url = chzzk_url.format(channelID=channel_id)
+            channel_url = chzzk_ch_live_url.format(channelID=channel_id)
+            station_url = chzzk_station_url.format(channelID=channel_id)
+            api_url = chzzk_live_url.format(channel_api_id=channel_id)
+            response = requests.get(url, headers=headers)
+            data = response.json()
+
+            open_live_status = data['content']['openLive']
+            if open_live_status:
+                api_response = requests.get(api_url, headers=headers, cookies=chzzk_cookies)
+                api_data = api_response.json()
+                api_content_data = api_data["content"]
+                api_livePlayback_data = api_content_data["livePlaybackJson"]
+                if api_content_data["adult"]:
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
+                            LiveStatus = f"{channel_name}: 📺 연령 제한 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
+                else:
+                    playback = json.loads(api_livePlayback_data)
+                    for media in playback["media"]:
+                        if media["mediaId"] == "HLS":
+                            HLS_Address = media["path"]
+                            LiveStatus = f"{channel_name}: 📺 지금 방송 중이야! [Web]({channel_url}) [HLS]({HLS_Address})"
+                            result_list.append(LiveStatus)
+            else:
+                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야! [채널]({station_url})"
+                result_list.append(LiveStatus)
+
+        result_list_final = '\n'.join(result_list)
+        print(result_list_final)
+        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final, parse_mode= 'Markdown', disable_web_page_preview=True)
+
     # Handler for the /stardays_status command (Second service)
     @classmethod
     async def stardays_status(cls, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -100,7 +272,6 @@ class TelegramBotHandler:
 
         channel_ids = {
             'a54372e8197f6d241a43a318279860d6': '나츠키',
-            '3a2d2f4e9132d822423f6aa879e598c5': '반',
             '0a2020b09b8cc7f2285b7ae5de2ce4d3': '테리'
         }
         result_list = []  # Save results for second service
@@ -201,56 +372,6 @@ class TelegramBotHandler:
         print(result_list_final)
         await bot.send_message(chat_id=update.message.chat_id, text=result_list_final, parse_mode= 'Markdown', disable_web_page_preview=True)
 
-    # Handler for the /isedolstatus command (AfreecaTV using Selenium)
-    @classmethod
-    async def isedolstatus(cls, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        bot = telegram.Bot(token)
-
-        # Part 4: Checking live status using Selenium (AfreecaTV channels)
-        afreeca_channel_ids = {
-            'jingburger1': '징버거',
-            'inehine': '아이네',
-            'lilpa0309': '릴파',
-            'cotton1217': '주르르',
-            'gosegu2': '고세구',
-            'viichan6': '비챤'
-        }
-
-        result_list = []  # Save results for AfreecaTV
-
-        # Set up Selenium (Edge options)
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument("--headless")  # Run in headless mode (no browser UI)
-        chrome_options.add_argument("--no-sandbox")  # Recommended for running as root
-        chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
-        chrome_options.add_argument("--disable-gpu")  # Disable GPU acceleration (optional)
-
-        # ChromDriver path
-        webdriver_service = ChromeService('/home/pmh10132000/chromedriver-linux64/chromedriver')
-
-        # Initialize the Chrome WebDriver
-        driver = webdriver.Chrome(service=webdriver_service, options=chrome_options)
-
-        # Iterate through AfreecaTV channels
-        for channel_id, channel_name in afreeca_channel_ids.items():
-            url = f'https://ch.sooplive.co.kr/{channel_id}'
-            driver.get(url)
-            try:
-                onAir_box = driver.find_element(By.CLASS_NAME, 'onAir_box')
-                LiveStatus = f"{channel_name}: 📺 지금 방송 중이야!"
-                result_list.append(LiveStatus)
-            except NoSuchElementException:
-                LiveStatus = f"{channel_name}: ❌ 방송 중이 아니야!"
-                result_list.append(LiveStatus)
-
-        # Close the Selenium driver after use
-        driver.quit()
-
-        # Combine results and send them back to the user
-        result_list_final = '\n'.join(result_list)
-        print(result_list_final)
-        await bot.send_message(chat_id=update.message.chat_id, text=result_list_final)
-
 if __name__ == "__main__":
     try:
         # Initialize the application
@@ -258,9 +379,11 @@ if __name__ == "__main__":
 
         # Add both handlers
         application.add_handler(CommandHandler('stelstatus', TelegramBotHandler.stelstatus))
+        application.add_handler(CommandHandler('aesther_status', TelegramBotHandler.aesther_status))
+        application.add_handler(CommandHandler('stardream_status', TelegramBotHandler.stardream_status))
         application.add_handler(CommandHandler('stardays_status', TelegramBotHandler.stardays_status))
         application.add_handler(CommandHandler('honeyz_status', TelegramBotHandler.honeyz_status))
-        application.add_handler(CommandHandler('isedolstatus', TelegramBotHandler.isedolstatus))
+        application.add_handler(CommandHandler('acaxia_status', TelegramBotHandler.acaxia_status))
 
         # Start the bot
         application.run_polling()
